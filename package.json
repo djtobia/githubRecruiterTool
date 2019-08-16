@@ -13,7 +13,8 @@
     "bootstrap-vue": "^2.0.0-rc.28",
     "core-js": "^2.6.5",
     "less": "^3.9.0",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "vuetify": "^2.0.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.10.0",
@@ -23,7 +24,11 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "less-loader": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "sass": "^1.17.4",
+    "sass-loader": "^7.1.0",
+    "vue-cli-plugin-vuetify": "^0.6.3",
+    "vue-template-compiler": "^2.6.10",
+    "vuetify-loader": "^1.2.2"
   },
   "eslintConfig": {
     "root": true,
