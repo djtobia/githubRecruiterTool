@@ -5,11 +5,14 @@
 
                 <v-data-table :headers="tableHeaders"
                               :items="usersInfo"
+                              :server-items-length="totalItems"
                               :items-per-page="50"
                               :footer-props="{
                                 itemsPerPageText: '',
-                                itemsPerPageOptions: [50]
-                                }"   >
+                                itemsPerPageOptions: [50],
+                                disableItemsPerPage: true
+                                }"
+                >
                     <template slot="item.avatar_url" slot-scope="props">
                         <img :src="props.item.avatar_url" style="width: 50px; height: 50px;" alt="users avatar"/>
                     </template>
@@ -51,7 +54,9 @@
                 pages: 0,
                 pagination: {
                     itemsPerPage: 50
-                }
+                },
+                currentPage: 0,
+                totalItems: 0
             };
         },
         mounted() {
@@ -63,7 +68,9 @@
                 if (!this.queryString == '')
                     axios.get('https://api.github.com/search/users?' + this.queryString)
                         .then(response => {
-                            console.log(response);
+                          console.log(response.data);
+                            this.totalItems = response.data.total_count;
+                            console.log('total items : ' + this.totalItems)
                             if (response.headers.link)
                                 this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
 

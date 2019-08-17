@@ -1,8 +1,11 @@
 <template>
     <v-content>
-        <v-banner :dark="true" class="text-center">Welcome to the Github Recruiter Tool!</v-banner>
+        <v-banner :dark="true" class="text-center">Welcome to the Github Recruiter Tool!
+        <template v-slot:actions>
+            <v-btn @click="hideCard = !hideCard"  color="purple" v-text="hideCard ? 'Show Search' : 'Hide Search'"/>
+        </template></v-banner>
         <v-card max-width="500"
-                class="mx-auto">
+                class="mx-auto" v-if="!hideCard">
             <v-card-title>What kind of search would you like to do?</v-card-title>
             <v-card-text>
                 <v-form>
@@ -48,7 +51,8 @@
                 username: 'Username',
                 errorText: 'You must put SOMETHING into a search field!',
                 toast: false,
-                query: ''
+                query: '',
+                hideCard: false
             };
         },
         components: {
