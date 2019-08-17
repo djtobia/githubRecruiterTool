@@ -32,12 +32,11 @@
                 <v-btn color="red"  @click="toast = false">X</v-btn>
             </v-snackbar>
         </v-card>
-        <users v-if="searchResults.length !== 0" :usersInfo="searchResults"/>
+        <users v-if="query !== ''" :query-string="query"/>
     </v-content>
 </template>
 
 <script>
-    import axios from 'axios';
     import users from './Users.vue';
 
     export default {
@@ -49,7 +48,7 @@
                 username: 'Username',
                 errorText: 'You must put SOMETHING into a search field!',
                 toast: false,
-                pages: 0
+                query: ''
             };
         },
         components: {
@@ -69,16 +68,7 @@
                         query += input + ':"' + this.searchInputs[input] + '" ';
                 }
                 query = query.trim().replace(/\s/g, '+') + "&per_page=50";
-                axios.get('https://api.github.com/search/users?' + query)
-                    .then(response => {
-                        console.log(response);
-                        if (response.headers.link)
-                            this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
-
-                        for (let item of response.data.items) {
-                            this.searchResults.push(this.formatItem(item));
-                        }
-                    })
+                this.query = query;
             },
             searchInputsAreEmpty() {
                     let maxCount = Object.keys(this.searchInputs).length;
@@ -88,15 +78,7 @@
                             count++;
                     }
                     return count === maxCount;
-
             },
-            formatItem(item) {
-                let newItem = {};
-                newItem['avatar_url'] = item.avatar_url;
-                newItem['username'] = item.login;
-                newItem['url'] = item.html_url;
-                return newItem;
-            }
         }
     }
 </script>
