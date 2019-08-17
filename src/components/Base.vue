@@ -76,9 +76,8 @@
                             this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
 
                         for (let item of response.data.items) {
-                            this.searchResults.push(item);
+                            this.searchResults.push(this.formatItem(item));
                         }
-                        console.log(this.searchInputs);
                     })
             },
             searchInputsAreEmpty() {
@@ -90,6 +89,13 @@
                     }
                     return count === maxCount;
 
+            },
+            formatItem(item) {
+                let newItem = {};
+                newItem['avatar_url'] = item.avatar_url;
+                newItem['username'] = item.login;
+                newItem['url'] = item.html_url;
+                return newItem;
             }
         }
     }
