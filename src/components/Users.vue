@@ -6,12 +6,10 @@
                 <v-data-table :headers="tableHeaders"
                               :items="usersInfo"
                               :server-items-length="totalItems"
-                              :items-per-page="50"
-                              :footer-props="{
-                                itemsPerPageText: '',
-                                itemsPerPageOptions: [50],
-                                disableItemsPerPage: true
-                                }"
+                              :items-per-page="itemsPerPage"
+                              :page.sync="currentPage"
+                              :loading="loading"
+                              :options.sync="itemsPerPage = $event"
                 >
                     <template slot="item.avatar_url" slot-scope="props">
                         <img :src="props.item.avatar_url" style="width: 50px; height: 50px;" alt="users avatar"/>
@@ -31,16 +29,33 @@
     export default {
         name: "Users",
         props: {
-            queryString: {
+            originalQueryString: {
                 type: String,
                 default: ''
             }
         },
         watch: {
-            queryString(value) { // watch it
-                this.queryString = value;
-                this.fetchSearchResults();
-
+            originalQueryString(value) { // watch it
+                this.originalQueryString = value;
+                this.query = value;
+                this.fetchSearchResults(this.query);
+            },
+            currentPage(page) {
+                if(this.query.match('&page=')) {
+                  let index = this.query.lastIndexOf('=');
+                  let newQuery = this.query.slice(0, index + 1);
+                  this.fetchSearchResults(newQuery + page);
+                } else {
+                  this.query += '&page=' + page;
+                }
+            },
+            itemsPerPage() {
+              console.log('in here');
+              let index = this.query.match('&per_page=');
+              if(index !== -1){
+                  let newQuery = this.query.slice(0, index+1);
+                  this.fetchSearchResults(newQuery+'&perPage='+ this.itemsPerPage + '&page='+this.currentPage)
+              }
             }
         },
         data() {
@@ -52,31 +67,35 @@
                 ],
                 usersInfo: [],
                 pages: 0,
-                pagination: {
-                    itemsPerPage: 50
-                },
-                currentPage: 0,
-                totalItems: 0
+                totalItems: 0,
+                currentPage: 1,
+                itemsPerPage: 10,
+                query: '',
+                loading: false
             };
         },
         mounted() {
-            this.fetchSearchResults();
+          this.query = this.originalQueryString;
+          this.fetchSearchResults(this.originalQueryString);
         },
         methods: {
-            fetchSearchResults() {
+            fetchSearchResults(query) {
                 this.usersInfo = [];
-                if (!this.queryString == '')
-                    axios.get('https://api.github.com/search/users?' + this.queryString)
+                this.loading = true;
+                if (!query == '')
+                    if(!query.match('&per_page=')) {
+                      query += '&per_page=' + this.itemsPerPage;
+                    }
+                    axios.get('https://api.github.com/search/users?' + query)
                         .then(response => {
-                          console.log(response.data);
                             this.totalItems = response.data.total_count;
-                            console.log('total items : ' + this.totalItems)
                             if (response.headers.link)
                                 this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
 
                             for (let item of response.data.items) {
                                 this.usersInfo.push(this.formatItem(item));
                             }
+                            this.loading = false;
                         })
             },
             formatItem(item) {
@@ -85,7 +104,7 @@
                 newItem['username'] = item.login;
                 newItem['url'] = item.html_url;
                 return newItem;
-            }
+            },
         }
     };
 </script>

@@ -35,7 +35,7 @@
                 <v-btn color="red"  @click="toast = false">X</v-btn>
             </v-snackbar>
         </v-card>
-        <users v-if="query !== ''" :query-string="query"/>
+        <users v-if="query !== ''" :original-query-string="query"/>
     </v-content>
 </template>
 
@@ -71,7 +71,7 @@
                     if (this.searchInputs[input] !== '')
                         query += input + ':"' + this.searchInputs[input] + '" ';
                 }
-                query = query.trim().replace(/\s/g, '+') + "&per_page=50";
+                query = query.trim().replace(/\s/g, '+') ;
                 this.query = query;
             },
             searchInputsAreEmpty() {
