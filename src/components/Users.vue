@@ -4,17 +4,17 @@
             <div class="col-md-12">
 
                 <v-data-table :headers="tableHeaders"
-                              :items="usersInfo"
+                              :items="usersInfoMain"
                               :disable-sort="true"
                               :server-items-length="totalItems > 1000 ? 1000 : totalItems"
                               :items-per-page="itemsPerPage"
                               :page.sync="currentPage"
                               :loading="loading"
-                              :no-data-text="'Sadly, Github only allows you to see the first 1000 results.'"
                               :footer-props="{
                                 itemsPerPageOptions: [5,10,25,50,100],
                                 showFirstLastPage: true
                               }"
+                              :show-expand="true"
                               @update:options="updateOptions($event)"
                 >
                     <template slot="item.avatar_url" slot-scope="props">
@@ -23,7 +23,26 @@
                     <template slot="item.url" slot-scope="props">
                         <a :href="props.item.url" target="_blank">{{props.item.url}}</a>
                     </template>
+                    <template slot="item.name">
+                        {{ usersInfoSecondary[0].fullname }}
+                    </template>
+                    <template slot="item.email">
+                        {{ usersInfoSecondary[0].email }}
+                    </template>
+                    <template slot="item.company">
+                        {{ usersInfoSecondary[0].company }}
+                    </template>
+                    <template slot="item.location">
+                        {{ usersInfoSecondary[0].location }}
+                    </template>
+                    <template slot="item.hireable">
+                       <v-chip :color="getColor(usersInfoSecondary[0].hireable)" dark>{{usersInfoSecondary[0].hireable}}</v-chip>
+                    </template>
+                    <template v-slot:expanded-item="{ headers }">
+                        <td :colspan="headers.length">Bio: {{ usersInfoSecondary[0].bio }}</td>
+                    </template>
                 </v-data-table>
+                {{ usersInfoSecondary }}
             </div>
         </div>
     </div>
@@ -52,9 +71,15 @@
                 tableHeaders: [
                     {text: "", value: 'avatar_url'},
                     {text: "Username", value: 'username'},
-                    {text: 'Github Url', value: 'url'}
+                    {text: 'Github Url', value: 'url'},
+                    {text: 'Name', value: 'name'},
+                    {text: 'Email', value: 'email'},
+                    {text: 'Company', value: 'company'},
+                    {text: 'Location', value: 'location'},
+                    {text: 'Hireable', value: 'hireable'}
                 ],
-                usersInfo: [],
+                usersInfoMain: [],
+                usersInfoSecondary: [],
                 pages: 0,
                 totalItems: 0,
                 currentPage: 1,
@@ -69,7 +94,7 @@
         },
         methods: {
             fetchSearchResults() {
-                this.usersInfo.splice(0, this.usersInfo.length);
+                this.usersInfoMain.splice(0, this.usersInfoMain.length);
                 this.loading = true;
                 if (this.query !== '') {
                     if (!this.query.match('&per_page=')) {
@@ -82,10 +107,20 @@
                                 this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
 
                             for (let item of response.data.items) {
-                                this.usersInfo.push(this.formatItem(item));
+                                this.usersInfoMain.push(this.formatItem(item));
                             }
                             this.loading = false;
+                            this.getSecondaryInfo();
                         });
+                }
+            },
+            getSecondaryInfo() {
+                //for each login in usersInfoMain, get that user and store in secondary.
+                this.usersInfoSecondary.splice(0, this.usersInfoSecondary.length);
+                for (let user of this.usersInfoMain) {
+                    axios.get('https://api.github.com/users/' + user.username).then(response => {
+                        this.usersInfoSecondary.push(this.formatSecondaryData(response.data));
+                    })
                 }
             },
             formatItem(item) {
@@ -94,6 +129,18 @@
                 newItem['username'] = item.login;
                 newItem['url'] = item.html_url;
                 return newItem;
+            },
+            formatSecondaryData(data) {
+                let formattedData = {
+                    bio: data.bio ? data.bio : 'None Listed',
+                    website: data.blog ? data.blog : 'None Listed',
+                    company: data.company ? data.company : 'None Listed',
+                    email: data.email ? data.email : 'None Listed',
+                    location: data.location ? data.location : 'None Listed',
+                    fullname: data.name ? data.name : 'No Name Listed',
+                    hireable: data.hireable ? 'Yes' : 'No'
+                };
+                return formattedData;
             },
             updateOptions(newOptions) {
                 this.itemsPerPage = newOptions.itemsPerPage;
@@ -114,6 +161,9 @@
                 if (index != null) {
                     return this.query.slice(0, index) + '&per_page=' + this.itemsPerPage + '&page=' + this.currentPage;
                 }
+            },
+            getColor(hireable) {
+                return hireable === 'No' ? 'red' : 'green';
             }
         }
     };
