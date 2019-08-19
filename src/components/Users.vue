@@ -23,26 +23,31 @@
                     <template slot="item.url" slot-scope="props">
                         <a :href="props.item.url" target="_blank">{{props.item.url}}</a>
                     </template>
-                    <template slot="item.name">
-                        {{ usersInfoSecondary[0].fullname }}
+                    <template slot="item.name" slot-scope="props">
+                       <span v-if="usersInfoSecondary[props.item.id]">{{ usersInfoSecondary[props.item.id].fullname }}</span>
                     </template>
-                    <template slot="item.email">
-                        {{ usersInfoSecondary[0].email }}
+                    <template slot="item.email" slot-scope="props">
+                       <span v-if="usersInfoSecondary[props.item.id]"> {{ usersInfoSecondary[props.item.id].email }} </span>
                     </template>
-                    <template slot="item.company">
-                        {{ usersInfoSecondary[0].company }}
+                    <template slot="item.company" slot-scope="props">
+                        <span v-if="usersInfoSecondary[props.item.id]"> {{ usersInfoSecondary[props.item.id].company }}</span>
                     </template>
-                    <template slot="item.location">
-                        {{ usersInfoSecondary[0].location }}
+                    <template slot="item.location" slot-scope="props">
+                        <span v-if="usersInfoSecondary[props.item.id]">{{ usersInfoSecondary[props.item.id].location }}</span>
                     </template>
-                    <template slot="item.hireable">
-                       <v-chip :color="getColor(usersInfoSecondary[0].hireable)" dark>{{usersInfoSecondary[0].hireable}}</v-chip>
+                    <template slot="item.hireable" slot-scope="props">
+                        <span v-if="usersInfoSecondary[props.item.id]">
+                            <v-chip :color="getColor(usersInfoSecondary[props.item.id].hireable)" dark>{{usersInfoSecondary[props.item.id].hireable}}</v-chip>
+                        </span>
                     </template>
-                    <template v-slot:expanded-item="{ headers }">
-                        <td :colspan="headers.length">Bio: {{ usersInfoSecondary[0].bio }}</td>
+                    <template slot="expanded-item" slot-scope="props">
+
+                        <td :colspan="tableHeaders.length-2">Bio: <span v-if="usersInfoSecondary[props.item.id]">{{ usersInfoSecondary[props.item.id].bio }}</span></td>
+                        <td :colspan="2">Website :
+                            <span v-if="usersInfoSecondary[props.item.id] && usersInfoSecondary[props.item.id].website !== 'None Listed'"><a :href="usersInfoSecondary[props.item.id].website" target="_blank">{{usersInfoSecondary[props.item.id].website}}</a></span>
+                        <span v-else>None Listed</span></td>
                     </template>
                 </v-data-table>
-                {{ usersInfoSecondary }}
             </div>
         </div>
     </div>
@@ -105,9 +110,9 @@
                             this.totalItems = response.data.total_count;
                             if (response.headers.link)
                                 this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
-
+                            let index = 0;
                             for (let item of response.data.items) {
-                                this.usersInfoMain.push(this.formatItem(item));
+                                this.usersInfoMain.push(this.formatItem(item, index++));
                             }
                             this.loading = false;
                             this.getSecondaryInfo();
@@ -123,17 +128,22 @@
                     })
                 }
             },
-            formatItem(item) {
+            formatItem(item, index) {
                 let newItem = {};
+                newItem['id'] = index;
                 newItem['avatar_url'] = item.avatar_url;
                 newItem['username'] = item.login;
                 newItem['url'] = item.html_url;
                 return newItem;
             },
             formatSecondaryData(data) {
+                let website = data.blog;
+                if(website && website.search('http') === -1){
+                    website = 'http://' + website;
+                }
                 let formattedData = {
                     bio: data.bio ? data.bio : 'None Listed',
-                    website: data.blog ? data.blog : 'None Listed',
+                    website: website ? website : 'None Listed',
                     company: data.company ? data.company : 'None Listed',
                     email: data.email ? data.email : 'None Listed',
                     location: data.location ? data.location : 'None Listed',
