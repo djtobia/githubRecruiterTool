@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <v-app>
         <div class="row">
             <div class="col-md-12">
 
@@ -15,6 +15,7 @@
                                 showFirstLastPage: true
                               }"
                               :show-expand="true"
+
                               @update:options="updateOptions($event)"
                 >
                     <template slot="item.avatar_url" slot-scope="props">
@@ -50,7 +51,7 @@
                 </v-data-table>
             </div>
         </div>
-    </div>
+    </v-app>
 </template>
 
 <script>
@@ -105,7 +106,12 @@
                     if (!this.query.match('&per_page=')) {
                         this.query = this.query + '&per_page=' + this.itemsPerPage;
                     }
-                    axios.get('https://api.github.com/search/users?' + this.query)
+                    axios.get('https://api.github.com/search/users?' + this.query,{
+                        auth: {
+                            username: 'djtobia',
+                            password: 'd3e084dec90fbd2df858870f7966566ca315f36a'
+                        }
+                    })
                         .then(response => {
                             this.totalItems = response.data.total_count;
                             if (response.headers.link)
@@ -123,7 +129,12 @@
                 //for each login in usersInfoMain, get that user and store in secondary.
                 this.usersInfoSecondary.splice(0, this.usersInfoSecondary.length);
                 for (let user of this.usersInfoMain) {
-                    axios.get('https://api.github.com/users/' + user.username).then(response => {
+                    axios.get('https://api.github.com/users/' + user.username, {
+                        auth: {
+                            username: 'djtobia',
+                            password: 'd3e084dec90fbd2df858870f7966566ca315f36a'
+                        }
+                    }).then(response => {
                         this.usersInfoSecondary.push(this.formatSecondaryData(response.data));
                     })
                 }

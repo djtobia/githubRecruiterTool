@@ -1,21 +1,12 @@
 <template>
   <div id="app">
-    <v-app>
-        <Base/>
-    </v-app>
+      <router-view></router-view>
   </div>
 </template>
 
 <script>
-    import Base from './components/Base.vue';
 
     export default {
-        name: 'App',
-        components: {
-            Base,
-        },
-        data: () => ({
-            //
-        }),
+        name: 'App'
     };
 </script>
