@@ -1,3 +1,5 @@
 module.exports = {
-        APIKEY: process.env.APIKEY
-}
+    configureWebpack: config => {
+            return { APIKEY: process.env.APIKEY};
+    }
+};
