@@ -126,6 +126,7 @@
                 }
             },
             getSecondaryInfo() {
+                console.log(process.env.apikey);
                 //for each login in usersInfoMain, get that user and store in secondary.
                 this.usersInfoSecondary.splice(0, this.usersInfoSecondary.length);
                 for (let user of this.usersInfoMain) {
