@@ -102,7 +102,6 @@
             fetchSearchResults() {
                 this.usersInfoMain.splice(0, this.usersInfoMain.length);
                 this.loading = true;
-                console.log(process.env);
                 if (this.query !== '') {
                     if (!this.query.match('&per_page=')) {
                         this.query = this.query + '&per_page=' + this.itemsPerPage;
