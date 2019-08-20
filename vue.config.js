@@ -1,5 +1,6 @@
+var merge = require('webpack-merge');
 module.exports = {
     configureWebpack: config => {
-            return { APIKEY: process.env.APIKEY};
+            merge(config, {APIKEY: process.env.APIKEY});
     }
 };
