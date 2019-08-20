@@ -102,6 +102,7 @@
             fetchSearchResults() {
                 this.usersInfoMain.splice(0, this.usersInfoMain.length);
                 this.loading = true;
+                console.log(process.env);
                 if (this.query !== '') {
                     if (!this.query.match('&per_page=')) {
                         this.query = this.query + '&per_page=' + this.itemsPerPage;
@@ -109,7 +110,7 @@
                     axios.get('https://api.github.com/search/users?' + this.query,{
                         auth: {
                             username: 'djtobia',
-                            password: process.env.APIKEY
+                            password: process.env.VUE_APP_API_KEY
                         }
                     })
                         .then(response => {
@@ -132,7 +133,7 @@
                     axios.get('https://api.github.com/users/' + user.username, {
                         auth: {
                             username: 'djtobia',
-                            password: process.env.APIKEY
+                            password: process.env.VUE_APP_API_KEY
                         }
                     }).then(response => {
                         this.usersInfoSecondary.push(this.formatSecondaryData(response.data));
