@@ -109,7 +109,7 @@
                     axios.get('https://api.github.com/search/users?' + this.query,{
                         auth: {
                             username: 'djtobia',
-                            password: process.env.APIKEY
+                            password: process.env.VUE_APP_API_KEY
                         }
                     })
                         .then(response => {
@@ -126,14 +126,14 @@
                 }
             },
             getSecondaryInfo() {
-                console.log(process.env.APIKEY);
+                console.log(process.env.VUE_APP_API_KEY);
                 //for each login in usersInfoMain, get that user and store in secondary.
                 this.usersInfoSecondary.splice(0, this.usersInfoSecondary.length);
                 for (let user of this.usersInfoMain) {
                     axios.get('https://api.github.com/users/' + user.username, {
                         auth: {
                             username: 'djtobia',
-                            password: process.env.APIKEY
+                            password: process.env.VUE_APP_API_KEY
                         }
                     }).then(response => {
                         this.usersInfoSecondary.push(this.formatSecondaryData(response.data));
