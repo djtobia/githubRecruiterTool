@@ -109,7 +109,7 @@
                     axios.get('https://api.github.com/search/users?' + this.query,{
                         auth: {
                             username: 'djtobia',
-                            password: process.env.VUE_APP_API_KEY
+                            password: process.env.APIKEY
                         }
                     })
                         .then(response => {
@@ -132,7 +132,7 @@
                     axios.get('https://api.github.com/users/' + user.username, {
                         auth: {
                             username: 'djtobia',
-                            password: process.env.VUE_APP_API_KEY
+                            password: process.env.APIKEY
                         }
                     }).then(response => {
                         this.usersInfoSecondary.push(this.formatSecondaryData(response.data));
