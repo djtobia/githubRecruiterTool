@@ -1,7 +1,7 @@
 <template>
-    <v-app>
-        <div class="row">
-            <div class="col-md-12">
+    <div>
+        <v-row>
+            <v-col cols="12">
 
                 <v-data-table :headers="tableHeaders"
                               :items="usersInfo"
@@ -18,10 +18,19 @@
                               @update:options="updateOptions($event)"
                 >
                     <template slot="item.avatar_url" slot-scope="props">
-                        <img :src="props.item.avatar_url" class="square-img" alt="users avatar"/>
+                        <v-img :src="props.item.avatar_url" class="square-img" alt="users avatar"/>
                     </template>
                     <template slot="item.url" slot-scope="props">
                         <a :href="props.item.url" target="_blank">{{props.item.url}}</a>
+                    </template>
+                    <template slot="item.email" slot-scope="props">
+                        <span v-if="props.item.email !== 'None Listed'">
+                            <a :href="'mailto:' + props.item.email">{{ props.item.email }}</a>
+                        </span>
+                        <span v-else>
+                            None Listed
+                        </span>
+
                     </template>
                     <template slot="item.hireable" slot-scope="props">
                         <v-chip :color="getColor(props.item.hireable)" dark>{{props.item.hireable}}</v-chip>
@@ -35,9 +44,9 @@
                             <span v-else>None Listed</span></td>
                     </template>
                 </v-data-table>
-            </div>
-        </div>
-    </v-app>
+            </v-col>
+        </v-row>
+    </div>
 </template>
 
 <script>
@@ -94,7 +103,7 @@
                     }
                     axios.get('https://api.github.com/search/users?' + this.query, {
                         auth: {
-                            username: 'djtobia',
+                            username: process.env.VUE_APP_USERNAME,
                             password: process.env.VUE_APP_API_KEY
                         }
                     })
@@ -106,7 +115,7 @@
                             for (let item of response.data.items) {
                                 axios.get('https://api.github.com/users/' + item.login, {
                                     auth: {
-                                        username: 'djtobia',
+                                        username: process.env.VUE_APP_USERNAME,
                                         password: process.env.VUE_APP_API_KEY
                                     },
                                 }).then(response2 => {
