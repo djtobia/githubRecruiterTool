@@ -14,7 +14,7 @@
                         <v-form>
                             <v-row>
                                 <v-col cols="6" md="6" sm="3">
-                                    <v-text-field label="Username (if you know it)"
+                                    <v-text-field label="Username"
                                                   v-model="searchInputs.user" @keyup.enter="search"></v-text-field>
                                 </v-col>
                                 <v-col cols="6" md="6" sm="3">
@@ -24,11 +24,11 @@
                             </v-row>
                             <v-row>
                                 <v-col cols="6" md="6" sm="3">
-                                    <v-text-field label="Full Name (if you know it)"
-                                                  v-model="searchInputs.fullname" @keyup.enter="search"></v-text-field>
+                                    <v-text-field label="Name"
+                                                  v-model="searchInputs.name" @keyup.enter="search"></v-text-field>
                                 </v-col>
                                 <v-col cols="6" md="6" sm="3">
-                                    <v-text-field label="Email (if you know it)"
+                                    <v-text-field label="Email"
                                                   v-model="searchInputs.email" @keyup.enter="search">
                                     </v-text-field>
                                 </v-col>
@@ -45,7 +45,7 @@
                 </v-card>
             </v-col>
         </v-row>
-        <users v-if="query !== ''" :original-query-string="query"/>
+        <users v-if="query !== ''" :original-query-string="query" />
     </v-content>
 </template>
 
@@ -56,7 +56,7 @@
         name: "Base",
         data() {
             return {
-                searchInputs: {user: '', location: '', fullname: '', email: ''},
+                searchInputs: {user: '', location: '', name: '', email: ''},
                 errorText: 'You must put SOMETHING into a search field!',
                 toast: false,
                 query: '',
@@ -79,6 +79,8 @@
                     if (this.searchInputs[input] !== '')
                         if (input === 'email') {
                             query += '"' + this.searchInputs[input] + '"' + ' in:email '
+                        } else if (input === 'name') {
+                            query += '"' + this.searchInputs[input] + '"' + ' in:name'
                         } else {
                             query += input + ':"' + this.searchInputs[input] + '" ';
                         }

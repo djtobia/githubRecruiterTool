@@ -1,5 +1,21 @@
 <template>
     <div>
+        <div v-if="usersInfo.length > 0">
+            <v-row justify="center">
+                <v-btn color="yellow">
+                    <download-excel
+                            :data="usersInfo"
+                            :fields="exportfields"
+                            type="csv"
+                            name="userResults.csv">
+                        Click here to export this pages results
+                    </download-excel>
+                </v-btn>
+            </v-row>
+            <v-row justify="center">
+                <span>This button will only export the contents on the current page.</span>
+            </v-row>
+        </div>
         <v-row>
             <v-col cols="12">
 
@@ -58,6 +74,10 @@
             originalQueryString: {
                 type: String,
                 default: ''
+            },
+            hireable: {
+                type: Boolean,
+                default: false
             }
         },
         watch: {
@@ -86,7 +106,19 @@
                 currentPage: 1,
                 itemsPerPage: 10,
                 query: '',
-                loading: false
+                loading: false,
+                exportfields: {
+                    Name: 'name',
+                    Hireable: 'hireable',
+                    Username: 'username',
+                    Email: 'email',
+                    Github: 'url',
+                    Company: 'company',
+                    Location: 'location',
+                    Bio: 'bio',
+                    Website: 'website',
+                    Contacted: 'None'
+                }
             };
         },
         mounted() {
@@ -152,6 +184,7 @@
                 if (newQuery) {
                     this.query = newQuery;
                 }
+                this.loading = true;
                 this.fetchSearchResults()
             },
             formatQueryString() {
