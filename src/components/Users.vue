@@ -2,7 +2,7 @@
     <div>
         <div v-if="usersInfo.length > 0">
             <v-row justify="center">
-                <v-col md="2">
+                <v-col md="3">
                     <v-text-field v-model="filename"
                                   label="Enter filename. Will default to 'UsersInfo.csv' (extension not required)"></v-text-field>
                 </v-col>
