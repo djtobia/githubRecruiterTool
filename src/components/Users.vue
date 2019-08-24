@@ -2,18 +2,27 @@
     <div>
         <div v-if="usersInfo.length > 0">
             <v-row justify="center">
-                <v-btn color="yellow">
-                    <download-excel
-                            :data="usersInfo"
-                            :fields="exportfields"
-                            type="csv"
-                            name="userResults.csv">
-                        Click here to export this pages results
-                    </download-excel>
-                </v-btn>
-            </v-row>
-            <v-row justify="center">
-                <span>This button will only export the contents on the current page.</span>
+                <v-col md="2">
+                    <v-text-field v-model="filename"
+                                  label="Enter filename. Will default to 'UsersInfo.csv' (extension not required)"></v-text-field>
+                </v-col>
+                <v-col md="3">
+                    <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                            <v-btn color="yellow" v-on="on">
+                                <download-excel
+                                        :data="usersInfo"
+                                        :fields="exportfields"
+                                        type="csv"
+                                        :name="filename + '.csv'">
+                                    Click here to export this pages results
+                                </download-excel>
+                            </v-btn>
+                        </template>
+                        <span>This button will only export the contents on the current page</span>
+                    </v-tooltip>
+
+                </v-col>
             </v-row>
         </div>
         <v-row>
@@ -118,7 +127,8 @@
                     Bio: 'bio',
                     Website: 'website',
                     Contacted: 'None'
-                }
+                },
+                filename: 'UsersInfo'
             };
         },
         mounted() {
