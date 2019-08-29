@@ -28,7 +28,7 @@
             <v-col cols="12">
 
                 <v-data-table :headers="tableHeaders"
-                              :items="usersInfo.length >= itemsPerPage ? usersInfo : []"
+                              :items="usersInfo.length >= itemsPerPage || totalItems <= itemsPerPage ? usersInfo : []"
                               :items-per-page="itemsPerPage"
                               :page.sync="currentPage"
                               :loading="loading"
