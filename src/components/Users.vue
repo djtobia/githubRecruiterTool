@@ -15,11 +15,10 @@
                                         :fields="exportfields"
                                         type="csv"
                                         :name="filename + '.csv'">
-                                    Click here to export this pages results
+                                    Click here to export this table
                                 </download-excel>
                             </v-btn>
                         </template>
-                        <span>This button will only export the contents on the current page</span>
                     </v-tooltip>
 
                 </v-col>
@@ -29,9 +28,7 @@
             <v-col cols="12">
 
                 <v-data-table :headers="tableHeaders"
-                              :items="usersInfo"
-                              :disable-sort="true"
-                              :server-items-length="totalItems > 1000 ? 1000 : totalItems"
+                              :items="usersInfo.length >= itemsPerPage ? usersInfo : []"
                               :items-per-page="itemsPerPage"
                               :page.sync="currentPage"
                               :loading="loading"
@@ -40,7 +37,6 @@
                                 showFirstLastPage: true
                               }"
                               :show-expand="true"
-                              @update:options="updateOptions($event)"
                 >
                     <template slot="item.avatar_url" slot-scope="props">
                         <v-img :src="props.item.avatar_url" class="square-img" alt="users avatar"/>
@@ -94,12 +90,16 @@
                 this.originalQueryString = value;
                 this.query = value;
                 this.fetchSearchResults();
+            },
+            hireable(value) {
+                this.hireable = value;
+                this.fetchSearchResults();
             }
         },
         data() {
             return {
                 tableHeaders: [
-                    {text: "", value: 'avatar_url'},
+                    {text: "", value: 'avatar_url', sortable: false},
                     {text: "Username", value: 'username'},
                     {text: 'Github Url', value: 'url'},
                     {text: 'Name', value: 'name'},
@@ -114,7 +114,9 @@
                 totalItems: 0,
                 currentPage: 1,
                 itemsPerPage: 10,
+                queryPerPage: 100,
                 query: '',
+                index: 0,
                 loading: false,
                 exportfields: {
                     Name: 'name',
@@ -141,7 +143,7 @@
                 this.loading = true;
                 if (this.query !== '') {
                     if (!this.query.match('&per_page=')) {
-                        this.query = this.query + '&per_page=' + this.itemsPerPage;
+                        this.query = this.query + '&per_page=' + this.queryPerPage;
                     }
                     axios.get('https://api.github.com/search/users?' + this.query, {
                         auth: {
@@ -150,10 +152,10 @@
                         }
                     })
                         .then(response => {
-                            this.totalItems = response.data.total_count;
+                            this.totalItems = response.data.total_count > 1000 ? 1000 : response.data.total_count;
                             if (response.headers.link)
                                 this.pages = response.headers.link.split(',')[1].match(/&page=\d*[^>]/g)[0].split('=')[1];
-                            let index = 0;
+                            this.index = 0;
                             for (let item of response.data.items) {
                                 axios.get('https://api.github.com/users/' + item.login, {
                                     auth: {
@@ -161,11 +163,49 @@
                                         password: process.env.VUE_APP_API_KEY
                                     },
                                 }).then(response2 => {
-                                    this.usersInfo.push(this.formatItem(item, response2.data, index++));
+                                    if (this.hireable && response2.data.hireable)
+                                        this.usersInfo.push(this.formatItem(item, response2.data, this.index++));
+                                    else if (!this.hireable)
+                                        this.usersInfo.push(this.formatItem(item, response2.data, this.index++));
+
                                 })
                             }
-                            this.loading = false;
+
+                            if (this.pages > 1)
+                                this.retrieveTheRestOfTheData().then(() => {
+                                    this.loading = false;
+                                });
+                            else
+                                this.loading = false;
                         });
+                }
+            },
+            async retrieveTheRestOfTheData() {
+                for (let i = 2; i <= this.pages; i++) {
+                    axios.get('https://api.github.com/search/users?' + this.formatQueryString(i), {
+                        auth: {
+                            username: process.env.VUE_APP_USERNAME,
+                            password: process.env.VUE_APP_API_KEY
+                        }
+                    })
+                        .then(response => {
+                                for (let item of response.data.items) {
+                                        axios.get('https://api.github.com/users/' + item.login, {
+                                            auth: {
+                                                username: process.env.VUE_APP_USERNAME,
+                                                password: process.env.VUE_APP_API_KEY
+                                            }
+                                        }).then(res => {
+                                            let data = res.data;
+                                            if (this.hireable && data.hireable)
+                                                this.usersInfo.push(this.formatItem(item, data, this.index++));
+                                            else if (!this.hireable)
+                                                this.usersInfo.push(this.formatItem(item, data, this.index++));
+                                        });
+
+                                }
+                            }
+                        );
                 }
             },
             formatItem(searchInfo, userInfo, index) {
@@ -187,17 +227,7 @@
                 newItem['hireable'] = userInfo.hireable ? 'Yes' : 'No';
                 return newItem;
             },
-            updateOptions(newOptions) {
-                this.itemsPerPage = newOptions.itemsPerPage;
-                this.currentPage = newOptions.page;
-                let newQuery = this.formatQueryString();
-                if (newQuery) {
-                    this.query = newQuery;
-                }
-                this.loading = true;
-                this.fetchSearchResults()
-            },
-            formatQueryString() {
+            formatQueryString(page) {
                 let index = null;
                 if (this.query.match('&per_page=')) {
                     index = this.query.match('&per_page=').index;
@@ -205,7 +235,7 @@
                     return '';
                 }
                 if (index != null) {
-                    return this.query.slice(0, index) + '&per_page=' + this.itemsPerPage + '&page=' + this.currentPage;
+                    return this.query.slice(0, index) + '&per_page=' + this.queryPerPage + '&page=' + page;
                 }
             },
             getColor(hireable) {

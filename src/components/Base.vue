@@ -23,14 +23,17 @@
                                 </v-col>
                             </v-row>
                             <v-row>
-                                <v-col cols="6" md="6" sm="3">
+                                <v-col cols="6" md="3" sm="3">
                                     <v-text-field label="Name"
                                                   v-model="searchInputs.name" @keyup.enter="search"></v-text-field>
                                 </v-col>
-                                <v-col cols="6" md="6" sm="3">
+                                <v-col cols="6" md="3" sm="3">
                                     <v-text-field label="Email"
                                                   v-model="searchInputs.email" @keyup.enter="search">
                                     </v-text-field>
+                                </v-col>
+                                <v-col cols="6" md="3" sm="3">
+                                    <v-checkbox label="Hireable only?" v-model="hireable" ></v-checkbox>
                                 </v-col>
                             </v-row>
                         </v-form>
@@ -45,7 +48,7 @@
                 </v-card>
             </v-col>
         </v-row>
-        <users v-if="query !== ''" :original-query-string="query" />
+        <users v-if="query !== ''" :original-query-string="query" :hireable="hireable" />
     </v-content>
 </template>
 
@@ -60,7 +63,8 @@
                 errorText: 'You must put SOMETHING into a search field!',
                 toast: false,
                 query: '',
-                hideCard: false
+                hideCard: false,
+                hireable: false
             };
         },
         components: {
